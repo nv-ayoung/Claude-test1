@@ -27,6 +27,30 @@ class FlaskAppTestCase(unittest.TestCase):
         self.assertEqual(data['status'], 'healthy')
         print("✓ Test passed: GET /health returns healthy status")
 
+    def test_time_endpoint(self):
+        """Test the time endpoint returns current date and time"""
+        response = self.client.get('/time')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data.decode('utf-8'))
+
+        # Check all required fields are present
+        self.assertIn('timestamp', data)
+        self.assertIn('date', data)
+        self.assertIn('time', data)
+        self.assertIn('timezone', data)
+        self.assertIn('human_readable', data)
+
+        # Verify timezone is UTC
+        self.assertEqual(data['timezone'], 'UTC')
+
+        # Verify date format (YYYY-MM-DD)
+        self.assertRegex(data['date'], r'^\d{4}-\d{2}-\d{2}$')
+
+        # Verify time format (HH:MM:SS)
+        self.assertRegex(data['time'], r'^\d{2}:\d{2}:\d{2}$')
+
+        print("✓ Test passed: GET /time returns current date and time in correct format")
+
     def test_404_error(self):
         """Test that invalid routes return 404"""
         response = self.client.get('/nonexistent')
